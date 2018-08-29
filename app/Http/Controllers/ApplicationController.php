@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UserAccounts;
 use Illuminate\Http\Request;
 use App\News;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,10 @@ class ApplicationController extends Controller
 
     public function index()
     {
-        //$this->data['title'] = 'Home';
-        $newsData=News::all();
-        return view('home',compact('newsData'));
+       // $userData=UserAccounts::all();
+        $userData=UserAccounts::orderBy('id','desc')->paginate(5);
+        return view('home',compact('userData'));
+
     }
 
     public function about()
@@ -39,10 +41,31 @@ class ApplicationController extends Controller
             return redirect()->back();
         }
         if($request->isMethod('post')){
+            $this->validate($request, [
+                'username'=>'required|min:3|max:50',
+                'email'=>'email',
+                'password'=>'required|confirmed|min:6',
+                'image'=>'mimes:jpeg,jpg,png,dng,gif',
+            ]);
             $data['username']=$request->username;
             $data['email']=$request->email;
-            $data['password']=$request->password;
-            if(DB::table('useraccounts')->insert($data)){
+            $data['password']=bcrypt($request->password);
+            if($request->hasFile('image')){
+                $image = $request->file('image');
+                $ext=$image->getClientOriginalExtension();
+                $imageName=str_random().'.'.$ext;
+                $uploadPath=public_path('public/lib/images');
+                if(!$image->move($uploadPath,$imageName))
+                {
+                    return redirect()->back;
+                }
+                $data['image']=$imageName;
+            }
+
+            /*if(DB::table('useraccounts')->insert($data)){
+                return redirect()->route('home')->with('success','Record is inserted');
+            }*/
+            if(UserAccounts::create($data)){
                 return redirect()->route('home')->with('success','Record is inserted');
             }
         }
