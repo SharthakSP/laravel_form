@@ -70,4 +70,56 @@ class ApplicationController extends Controller
             }
         }
     }
+
+    public function deleteUser(Request $request)
+    {
+        $id=$request->user_id;
+        if($this->deleteImage($id) && UserAccounts::where('id',$id)->delete())
+        {
+            return redirect()->route('home')->with('success','Record is deleted');
+        }
+    }
+
+    public function deleteImage($id)
+    {
+        $deleteRecord=UserAccounts::findOrFail($id);
+        $imageName=$deleteRecord->image;
+        $delete_path = public_path('public/lib/images/'.$imageName);
+        if(file_exists($delete_path)){
+            return unlink($delete_path);
+        }
+        return true;
+    }
+
+    public function editUser(Request $request)
+    {
+        $id=$request->user_id;
+        $editRecord=UserAccounts::findOrFail($id);
+        return view('edit_user',compact('editRecord'));
+    }
+
+    public function editAction(Request $request)
+    {
+        $this->validate($request, [
+            'username'=>'required|min:3|max:50',
+            'email'=>'email',
+            'image'=>'mimes:jpeg,jpg,png,dng,gif',
+        ]);
+        $id=$request->user_id;
+        $data['username']=$request->username;
+        $data['email']=$request->email;
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $ext=$image->getClientOriginalExtension();
+            $imageName=str_random().'.'.$ext;
+            $uploadPath=public_path('public/lib/images');
+            if($this->deleteImage($id) && $image->move($uploadPath,$imageName))
+            {
+                $data['image']=$imageName;
+            }
+        }
+        if(UserAccounts::where('id',$id)->update($data)){
+            return redirect()->route('home')->with('success','Record is updated');
+        }
+    }
 }

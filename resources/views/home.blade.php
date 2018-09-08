@@ -24,9 +24,7 @@
                 <div class="form-group" >
                     <label for="image">Profile Picture</label>
                     <input type="file" name="image" id="imageid" class="btn btn-default">
-                    <a href="" style="color:red">{{$errors->first(
-
-                    ')}}</a>
+                    <a href="" style="color:red">{{$errors->first('image')}}</a>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -44,8 +42,8 @@
             </form>
         </div>
 
-        <div class="col-md-8 " >
-            <table class="table table-hover">
+        <div class="col-md-8" >
+            <table class="table table-bordered table-striped" >
                 <tr>
                     <td>S.N.</td>
                     <td>Username</td>
@@ -60,16 +58,16 @@
                             <td>{{$datum->username}}</td>
                             <td>{{$datum->email}}</td>
                             <td>
-                                <img src="{{url('public/lib/images/'.$datum->image)}}" alt="">
+                                <img src="{{url('public/lib/images/'.$datum->image)}}" style="height:30px;width:50px;" alt="">
                             </td>
-                            <td>Edit/Delete</td>
+                            <td>
+                                <a href="{{route('edit').'/'.$datum->id}}" class="btn btn-primary btn-xs">Edit</a>
+                                <a href="{{route('delete').'/'.$datum->id}}" class="btn btn-danger btn-xs">Delete</a>
+                            </td>
                             <td>{{$datum->created_at}}</td>
                         </tr>
                 @endforeach
             </table>
-
         </div>
     </div>
-
-
 @stop
